@@ -56,7 +56,7 @@
               <label for="L_repass" class="layui-form-label">
               </label>
               <button  class="layui-btn" id="save" lay-filter="save" lay-submit="submit">
-                  增加
+                  保存
               </button>
           </div>
       </form>

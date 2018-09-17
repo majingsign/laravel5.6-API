@@ -28,11 +28,17 @@
             <hr class="hr15">
             <input value="登录" lay-submit lay-filter="login" id="login" style="width:100%;" type="button">
             <hr class="hr20" >
+            <a href="{{route('index.index.index')}}"><input value="员工打卡" style="width:100%;" type="button"></a>
         </form>
     </div>
 
     <script>
         $(function  () {
+            $("input[name='password']").keydown(function(e){
+                if(e.keyCode == 13){
+                    $("#login").click();
+                }
+            });
             $('#login').click(function(){
                 username = $("input[name='username']").val();
                 userpwd  = $("input[name='password']").val();
@@ -43,13 +49,20 @@
                     data:{username:username,password:userpwd,_token:token},
                     dataType:"json",
                     success:function (data) {
-                        if(data.code == 200){
-                            $("#login").val("登陆成功");
-                            setTimeout(function (){
+                        if(data.code == 200) {
+                            $("#login").val(data.msg);
+                            setTimeout(function () {
                                 window.location.href = "{{route('admin.index')}}";
-                            },2000);
+                            }, 2000);
+                        }else if(data.code == 100){
+                            $("#login").val(data.msg);
+                            setTimeout(function () {
+                                window.location.href = "{{route('index.index.index')}}";
+                            }, 2000);
                         }else{
                             $("#login").val(data.msg);
+                            setTimeout(function (){$("#login").val('登陆');},2000);
+                            // setTimeout(function (){window.location.reload();},2000);
                         }
                     },
                     error:function (err) {

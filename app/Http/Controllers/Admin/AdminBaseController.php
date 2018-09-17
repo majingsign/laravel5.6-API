@@ -9,8 +9,8 @@
 namespace  App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Request;
+use App\Http\Model\Depart;
+use App\Http\Model\Menu;
 use Illuminate\Support\Facades\Session;
 
 /**
@@ -33,6 +33,68 @@ class AdminBaseController extends Controller {
         }else{
             return true;
         }
+    }
+
+
+    /**
+     * 检查部门权限
+     */
+    public function checkDepart () {
+        $departid = Session::get('departid');
+        if(isset($departid) && !empty($departid)){
+            $depart = new Depart();
+            $act = $depart->findDepartMenuList($departid);
+            if($act == "*"){
+                return false;
+            }else{
+                return $departid;
+            }
+        }else{
+            return false;
+        }
+    }
+
+
+    /**
+     * 菜单检测并获取菜单
+     */
+    protected function menuCheck ($flg = 0) {
+        // 部门关联id
+        $departid = Session::get('departid');
+        if(empty($departid) || $departid == ''){
+            return null;
+        }else{
+            $depart = new Depart();
+            $list = $depart->findDepartMenuList($departid);
+            if($list == '' || empty($list)){
+                return null;
+            }
+            $menus = $this->menuLists($list,$flg);
+            if($menus == null){
+                return null;
+            }
+            return $menus;
+        }
+    }
+
+    /**
+     * 获取全部的菜单
+     * @param $data 菜单列表
+     * @param $flg  1 无需循环  0 需要循环
+     * @return array|bool|null
+     */
+    public function menuLists ($data,$flg = 0) {
+        //超级管理员
+        $menu = new Menu();
+        if($data == '*'){
+            $menus = $menu->menuLists($flg);
+        }else{
+            $menus = $menu->getMenuids($data,$flg);
+        }
+        if($menus == '' || empty($menus)){
+            return null;
+        }
+        return $menus;
     }
 
 }

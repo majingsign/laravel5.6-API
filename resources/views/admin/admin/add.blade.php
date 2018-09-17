@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
-  
   <head>
     <meta charset="UTF-8">
-    <title>欢迎页面-X-admin2.0</title>
+    <title>新增管理员</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
@@ -26,16 +25,41 @@
             {{ csrf_field() }}
           <div class="layui-form-item">
               <label for="L_username" class="layui-form-label">
-                  <span class="x-red">*</span>昵称
+                  <span class="x-red">*</span>管理员昵称
               </label>
               <div class="layui-input-inline">
                   <input type="text" id="L_username" name="username" required="" lay-verify="nikename"
                   autocomplete="off" class="layui-input">
               </div>
           </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label"><span class="x-red">*</span>请选择公司</label>
+                <div class="layui-input-inline">
+                    <select name="company" id="company" lay-verify="company" lay-filter="company">
+                        <option value="">--请选择公司--</option>
+                        @if(isset($company) && !empty($company))
+                            @foreach($company as $v)
+                                <option value="{{$v->id}}">{{$v->name}}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label"><span class="x-red">*</span>选择部门</label>
+                <div class="layui-input-inline">
+                    <select name="depart" id="depart" lay-verify="depart">
+                        <option value="">--请选择部门--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
           <div class="layui-form-item">
               <label for="L_pass" class="layui-form-label">
-                  <span class="x-red">*</span>密码
+                  <span class="x-red">*</span>登陆密码
               </label>
               <div class="layui-input-inline">
                   <input type="password" id="L_pass" name="pass" required="" lay-verify="pass"
@@ -63,18 +87,53 @@
           </div>
       </form>
     </div>
-    <script>
+    <script type="application/javascript">
         layui.use(['form','layer'], function(){
             $ = layui.jquery;
           var form = layui.form
           ,layer = layui.layer;
-        
-          //自定义验证规则
+            form.on('select(company)', function(data){
+                com_id = data.value;
+                if(com_id == "" || com_id == 0){
+                    $("#depart").html("<option value=''>--请选择部门--</option>");
+                    form.render('select');
+                    layer.msg('请选择公司');
+                    return false;
+                }
+                $.ajax({
+                    type: "get",
+                    url: "{{route('admin.admin.ajaxDepart')}}",
+                    dataType: 'json',
+                    cache: false,
+                    data: {company: com_id},
+                    success: function (data) {
+                        if (data.code == 200) {
+                            var cityhtml = "<option value=''>--请选择部门--</option>";
+                            $.each(data.data, function (k, v) {
+                                cityhtml += "<option value='" + v.id + "'>" + v.name + "</option>";
+                            });
+                            $("#depart").html(cityhtml);
+                            form.render('select');
+                        }
+                    }
+                });
+            });
+            //自定义验证规则
           form.verify({
             nikename: function(value){
-              if(value.length < 4){
-                return '昵称至少得4个字符';
+              if(value.length < 2){
+                return '姓名至少得2个字符';
               }
+            },
+            company: function(value){
+             if(value == null || value == ''){
+                 return '选择公司';
+             }
+            },
+             depart: function(value){
+             if(value == null || value == ''){
+                 return '选择部门';
+             }
             }
             ,pass: [/(.+){6,12}$/, '密码必须6到12位']
             ,repass: function(value){
@@ -91,14 +150,11 @@
               $.ajax({
                   url:"{{route('admin.admin.addAdmin')}}",
                   type:"post",
-                  data:{username:data.field.username,pass:data.field.pass,_token:token},
+                  data:{username:data.field.username,company:data.field.company,depart:data.field.depart,pass:data.field.pass,_token:token},
                   dataType:"json",
                   success:function (data) {
                       if(data.code == 200){
                           alert(data.msg);
-                          // var index = parent.layer.getFrameIndex(window.name);
-                          // //     //关闭当前frame
-                          // parent.layer.close(index);
                           parent.location.href = "{{route('admin.admin.list')}}";
                       }else{
                           alert(data.msg);

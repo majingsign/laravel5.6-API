@@ -31,14 +31,8 @@
 </div>
 <div class="x-body">
     <div class="layui-row">
-        <form class="layui-form layui-col-md12 x-so">
-            <input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
-            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
-        </form>
+       <button class="save layui-btn layui-btn-radius">更新本月最后一天上班内容</button>
     </div>
-    {{--<xblock>--}}
-        {{--<button class="layui-btn" onclick="x_admin_show('添加员工','{{route('admin.member.add')}}',600,400)"><i class="layui-icon"></i>添加</button>--}}
-    {{--</xblock>--}}
     <table class="layui-table">
         <thead>
         <tr>
@@ -66,11 +60,12 @@
                     @elseif($user->last_month_dat_type == 7)
                         第二天休息
                         @else
-                        暂未设置
+                        暂未设置或最后一天已离职
                   @endif
                 </td>
+
                 <td class="td-manage">
-                    <a title="编辑"  onclick="x_admin_show('编辑','{{route('admin.shift.edit',['user_name' => $user ->user_name,'user_id' => $user -> user_id,'id' => $user->id])}}',600,400)" href="javascript:;">
+                    <a title="编辑" onclick="x_admin_show('编辑','{{route('admin.shift.edit',['user_name' => $user ->user_name,'user_id' => $user -> user_id,'id' => $user->id,'type' => $user -> last_month_dat_type])}}',600,400)" href="javascript:;">
                         <i class="layui-icon">&#xe642;</i>
                     </a>
                 </td>
@@ -107,6 +102,28 @@
             });
         });
     }
+
+
+    $(function () {
+        //当点击更新数据的时候
+        $('.save').click(function(){
+           $.ajax({
+               url : '{{route("admin.shift.syssetting")}}',
+               type : 'get',
+               dataType : 'json',
+               success: function (data) {
+                   if(data.code == 1){
+                       layer.alert(data.message);
+                       location.reload();
+                   } else {
+                       layer.alert(data.message);
+                     return false;
+                   }
+               }
+           })
+        })
+
+    })
 </script>
 </body>
 </html>

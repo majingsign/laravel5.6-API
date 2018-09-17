@@ -31,11 +31,11 @@
         <i class="layui-icon" style="line-height:30px">ဂ</i></a>
     </div>
     <div class="x-body">
-      <div class="layui-row">
-        {{--<form class="layui-form layui-col-md12 x-so">--}}
-          {{--<input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">--}}
-          {{--<button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>--}}
-        {{--</form>--}}
+        <div class="layui-row">
+         <form class="layui-form layui-col-md12 x-so" method="get" action="{{route('admin.admin.list')}}">
+          <input type="text" name="username"  value="{{$admin}}" placeholder="请输入管理员姓名" autocomplete="off" class="layui-input">
+          <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+        </form>
       </div>
       <xblock>
         <button class="layui-btn" onclick="x_admin_show('添加用户','{{route('admin.admin.add')}}',600,400)"><i class="layui-icon"></i>添加</button>
@@ -48,9 +48,9 @@
             <th>操作</th></tr>
         </thead>
         <tbody>
-        @foreach($list as $v)
+        @foreach($list as $k => $v)
           <tr>
-            <td>{{$v->id}}</td>
+            <td>{{$k+1}}</td>
             <td>{{$v->admin_name}}</td>
             <td class="td-manage">
               <a title="删除" onclick="member_del(this,{{$v->id}})" href="javascript:;">

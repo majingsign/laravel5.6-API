@@ -40,15 +40,19 @@ class CityController extends AdminBaseController {
      * @return array
      */
     public function addCity (Request $request) {
-        $cityname = $request->input('cityname');
+        $cityname  = $request->input('cityname');
+        $workernum = $request->input('workernum');
         if($cityname == '' || empty($cityname)){
             return ['code'=>0,'msg'=>'省份不能为空!'];
+        }
+        if($workernum == '' || empty($workernum)){
+            return ['code'=>0,'msg'=>'值班人数不能为空!'];
         }
         $city = new City();
         if($city->cityName($cityname)){
             return ['code'=>0,'msg'=>'省份已存在!'];
         }
-        if($city->cityAdd(['name'=>$cityname,'pid'=>0])){
+        if($city->cityAdd(['name'=>$cityname,'pid'=>0,'min_num'=>$workernum])){
             return ['code'=>200,'msg'=>'省份添加成功!'];
         }else{
             return ['code'=>0,'msg'=>'省份添加失败!'];
@@ -73,22 +77,31 @@ class CityController extends AdminBaseController {
      * @return array
      */
     public function saveCity (Request $request) {
-        $id       = $request->input('id');
-        $cityname = $request->input('cityname');
+        $id        = $request->input('id');
+        $cityname  = $request->input('cityname');
+        $workernum = $request->input('workernum');
         if($id == '' || empty($id)){
             return ['code'=>0,'msg'=>'参数错误!'];
         }
         if($cityname == '' || empty($cityname)){
             return ['code'=>0,'msg'=>'省份不能为空!'];
         }
-        $city = new City();
-        if($city->cityName($cityname)){
-            return ['code'=>0,'msg'=>'省份已存在'];
+        if($workernum == '' || empty($workernum)){
+            return ['code'=>0,'msg'=>'值班人数不能为空!'];
         }
-        if($city->citySave($id,['name'=>$cityname])){
-            return ['code'=>200,'msg'=>'修改成功!'];
+        $city = new City();
+        //判断城市名称是否更改
+        $cityNames = $city->cityEdit($id);
+        if($cityNames->name == $cityname){
+            if($city->citySave($id,['name'=>$cityname,'min_num'=>$workernum])){
+                return ['code'=>200,'msg'=>'修改成功!'];
+            }else{
+                return ['code'=>0,'msg'=>'修改失败!'];
+            }
         }else{
-            return ['code'=>0,'msg'=>'修改失败!'];
+            if($city->cityName($cityname)){
+                return ['code'=>0,'msg'=>'省份已存在'];
+            }
         }
     }
 

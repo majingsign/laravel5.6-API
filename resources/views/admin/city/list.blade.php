@@ -38,6 +38,7 @@
           <tr>
             <th>序号</th>
             <th>省份</th>
+            <th>值班人数</th>
             <th>操作</th></tr>
         </thead>
         <tbody>
@@ -47,6 +48,7 @@
             <td>
               {{$city->name}}
             </td>
+            <td>{{$city->min_num}}</td>
             <td class="td-manage">
               <a title="编辑"  onclick="x_admin_show('编辑','{{route('admin.city.edit',['id'=>$city->id])}}',600,400)" href="javascript:;">
                 <i class="layui-icon">&#xe642;</i>

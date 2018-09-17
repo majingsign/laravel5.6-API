@@ -25,7 +25,7 @@
             {{ csrf_field() }}
         <div class="layui-form-item">
               <label for="L_username" class="layui-form-label">
-                  <span class="x-red">*</span>昵称
+                  <span class="x-red">*</span>员工姓名
               </label>
               <div class="layui-input-inline">
                   <input type="text" id="L_username" name="username" required="" lay-verify="nikename"
@@ -34,29 +34,83 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label"><span class="x-red">*</span>选择类型</label>
+                <label class="layui-form-label"><span class="x-red">*</span>选择公司</label>
                 <div class="layui-input-inline">
-                    <select name="type" lay-verify="type">
-                        @foreach($type as $k => $t)
-                            <option value="{{$k}}">{{$t}}</option>
-                        @endforeach
+                    <select name="company" id="company" lay-verify="company" lay-filter="company">
+                        <option value="">--请选择公司--</option>
+                            @if(isset($company) && !empty($company))
+                                @foreach($company as $v)
+                                    <option value="{{$v->id}}">{{$v->name}}</option>
+                                @endforeach
+                            @endif
                     </select>
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label"><span class="x-red">*</span>选择省份</label>
+                <label class="layui-form-label"><span class="x-red">*</span>选择部门</label>
                 <div class="layui-input-inline">
-                    <select name="city" lay-verify="city">
-                        <option value="">请选择省份</option>
-                        @foreach($list as $v)
-                            <option value="{{$v->id}}">{{$v->name}}</option>
-                        @endforeach
+                    <select name="depart" lay-verify="depart" id="depart">
+                        <option value="">--请选择部门--</option>
                     </select>
                 </div>
             </div>
         </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label"><span class="x-red">*</span>选择类型</label>
+                <div class="layui-input-inline">
+                    <select name="type" lay-verify="type">
+                        @if(isset($type) && !empty($type))
+                            @foreach($type as $k => $t)
+                                <option value="{{$k}}">{{$t}}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">选择省份</label>
+                <div class="layui-input-inline">
+                    <select name="city" lay-verify="city">
+                        <option value="">请选择省份</option>
+                        @if(isset($list) && !empty($list))
+                            @foreach($list as $v)
+                                <option value="{{$v->id}}">{{$v->name}}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="addtime" class="layui-form-label">
+                <span class="x-red">*</span>入职时间
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="addtime" name="addtime" required=""  lay-verify="addtime" autocomplete="off" class="layui-input">
+            </div>
+
+        </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label"><span class="x-red"></span>是否排班</label>
+                    <div class="layui-input-inline">
+                        <select name="is_generate" lay-verify="depart">
+                            <option value="0">否</option>
+                            <option value="1">是</option>
+
+                        </select>
+                    </div>
+                    <span style="font-size: 12px;color: red;">
+                默认新入职员工,统一都按照轮班上班,且系统不生成本月最后一天上班数据,需自行手动修改
+            </span>
+                </div>
+
+            </div>
 
         <div class="layui-form-item">
              <label for="L_repass" class="layui-form-label">
@@ -68,25 +122,72 @@
       </form>
     </div>
     <script>
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#addtime'
+            });
+        });
         layui.use(['form','layer'], function(){
             $ = layui.jquery;
           var form = layui.form
           ,layer = layui.layer;
+            form.on('select(company)', function(data){
+                com_id = data.value;
+                if(com_id == "" || com_id == 0){
+                    $("#depart").html("<option value=''>--请选择部门--</option>");
+                    form.render('select');
+                    layer.msg('请选择公司');
+                    return false;
+                }
+                $.ajax({
+                    type: "get",
+                    url: "{{route('admin.member.ajaxMemberDepart')}}",
+                    dataType: 'json',
+                    cache: false,
+                    data: {company: com_id},
+                    success: function (data) {
+                        if (data.code == 200) {
+                            var cityhtml = "<option value=''>--请选择部门--</option>";
+                            $.each(data.data, function (k, v) {
+                                cityhtml += "<option value='" + v.id + "'>" + v.name + "</option>";
+                            });
+                            $("#depart").html(cityhtml);
+                            form.render('select');
+                        }
+                    }
+                });
+            });
           //自定义验证规则
           form.verify({
             nikename: function(value){
                 if(value == null || value == ''){
-                    return '昵称必填';
+                    return '员工昵称必填';
                 }
+            },
+            company: function(value){
+              if(value == null || value == ''){
+                return '请选择公司';
+              }
+            },
+            depart: function(value){
+              if(value == null || value == ''){
+                return '请选择部门';
+              }
             },
             type: function(value){
               if(value == null || value == ''){
                 return '请选择类型';
               }
+            // },
+            // city: function(value){
+            //     if(value == null || value == ''){
+            //         return '请选省份';
+            //     }
             },
-            city: function(value){
+            addtime: function(value){
                 if(value == null || value == ''){
-                    return '请选省份';
+                    return '入职时间必填';
                 }
             }
           });
@@ -96,7 +197,7 @@
               $.ajax({
                   url:"{{route('admin.member.addMember')}}",
                   type:"post",
-                  data:{username:data.field.username,type:data.field.type,city:data.field.city,_token:token},
+                  data:{username:data.field.username,type:data.field.type,company:data.field.company,depart:data.field.depart,city:data.field.city,addtime:data.field.addtime,_token:token},
                   dataType:"json",
                   success:function (data) {
                       if(data.code == 200){

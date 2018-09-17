@@ -20,7 +20,7 @@
 <body>
     <!-- 顶部开始 -->
     <div class="container">
-        <div class="logo"><a href="./index.html">忆享科技内部排班系统</a></div>
+        <div class="logo"><a href="{{route('admin.index')}}">忆享科技</a></div>
         <div class="left_open">
             <i title="展开左侧栏" class="iconfont">&#xe699;</i>
         </div>
@@ -42,97 +42,27 @@
     <div class="left-nav">
       <div id="side-nav">
         <ul id="nav">
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe6b8;</i>
-                    <cite>员工管理</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.member.list')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>员工列表</cite>
-                            
-                        </a>
-                    </li >
-                </ul>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe726;</i>
-                    <cite>管理员管理</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.admin.list')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>管理员列表</cite>
-                        </a>
-                    </li >
-                </ul>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.admin.editpwd')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>修改密码</cite>
-                        </a>
-                    </li >
-                </ul>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe723;</i>
-                    <cite>城市管理</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.city.list')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>城市列表</cite>
-                        </a>
-                    </li >
-                </ul>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe723;</i>
-                    <cite>规则管理</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.duty.list')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>规则列表</cite>
-                        </a>
-                    </li >
-                </ul>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe6ce;</i>
-                    <cite>排班管理</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="{{route('admin.shift.setting')}}">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>轮班最后一天上班情况</cite>
-                        </a>
-                    </li >
-                    <li>
-                        <a _href="cate.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>排班列表</cite>
-                        </a>
-                    </li >
-
-                </ul>
-            </li>
+            @foreach($menus as $v)
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">{{html_entity_decode($v->tip)}}</i>
+                        <cite>{{$v->name}}</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    @if(isset($v->submenu) && (is_object($v->submenu) || is_array($v->submenu)) && !empty($v->submenu))
+                        @foreach($v->submenu as $vv)
+                            <ul class="sub-menu">
+                                <li>
+                                    <a _href="/{{$vv->mm}}/{{$vv->mc}}/{{$vv->ma}}">
+                                        <i class="iconfont">&#xe6a7;</i>
+                                        <cite>{{$vv->name}}</cite>
+                                    </a>
+                                </li >
+                            </ul>
+                        @endforeach
+                    @endif
+                </li>
+            @endforeach
         </ul>
       </div>
     </div>

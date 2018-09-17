@@ -13,9 +13,4 @@ use App\Http\Controllers\Controller;
 
 class IndexBaseController extends Controller {
 
-
-    public function returns (){
-        echo "<script type='text/javascript'>alert('生成失败，请重新生成!');</script>";
-        exit;
-    }
 }

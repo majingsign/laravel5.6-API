@@ -20,7 +20,7 @@ class City {
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function cityList () {
-        return DB::table($this->table)->select(['id','name','pid'])->orderBy('id','desc')->paginate(35);
+        return DB::table($this->table)->select(['id','name','pid','min_num'])->orderBy('id','desc')->paginate(35);
     }
 
     /**
@@ -36,7 +36,7 @@ class City {
      * @param $cityid
      */
     public function findCityId($cityid) {
-        return DB::table($this->table)->select(['id','name'])->where(['id'=>$cityid])->first();
+        return DB::table($this->table)->select(['id','name','min_num'])->where(['id'=>$cityid])->first();
     }
 
     /**
@@ -70,7 +70,7 @@ class City {
      * @param $id
      */
     public function cityEdit($id) {
-        return DB::table($this->table)->select(['id','name'])->where(['id'=>$id])->first();
+        return DB::table($this->table)->select(['id','name','min_num'])->where(['id'=>$id])->first();
     }
 
     /**
@@ -90,5 +90,33 @@ class City {
     public function citySum () {
         return DB::table($this->table)->count();
     }
+
+    public function getCityByIdList(){
+        $list = DB::table($this -> table) -> get() -> toArray();
+        $return_arr = [];
+        if(count($list) > 0){
+            foreach($list as $value){
+                $return_arr[$value -> id] = $value;
+            }
+        }
+        return $return_arr;
+    }
+
+    /** 获取所有的城市id
+     * @return array
+     */
+    public function getCityIdArr(){
+        $list = DB::table($this -> table) -> select('id','min_num') -> orderBy('id','asc') -> get() -> toArray();
+        $city_arr = [];
+        $min_arr = [];
+       if(count($list) > 0){
+           foreach($list as $value){
+               $city_arr[] = $value -> id;
+               $min_arr[$value -> id] = $value -> min_num;
+           }
+       }
+       return [$city_arr,$min_arr];
+    }
+
 
 }

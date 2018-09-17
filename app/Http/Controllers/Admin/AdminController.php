@@ -10,7 +10,10 @@ namespace App\Http\Controllers\Admin;
 
 
 use App\Http\Model\Admin;
+use App\Http\Model\Company;
+use App\Http\Model\Depart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
@@ -21,9 +24,15 @@ class AdminController extends AdminBaseController {
      * @param Request $request
      */
     public function list (Request $request) {
+        $adminname = $request->input('username');
         $admin = new Admin();
-        $list = $admin->adminList();
-        return view('admin.admin.list',['list'=>$list]);
+        $comAdmin = Session::get('comAdmin');
+        if(!empty($comAdmin) || $comAdmin != ''){
+            $list = $admin->adminList($comAdmin,$adminname);
+        }else{
+            $list = $admin->adminList(0,$adminname);
+        }
+        return view('admin.admin.list',['list'=>$list,'admin'=>$adminname]);
     }
 
     /**
@@ -31,7 +40,30 @@ class AdminController extends AdminBaseController {
      * @param Request $request
      */
     public function add() {
-        return view('admin.admin.add');
+        $company = new Company();
+        $com_id = Session::get('comAdmin');
+        if($com_id){
+            $com = $company->companyListsId($com_id);
+        }else{
+            $com = $company->companyLists();
+        }
+//        $depart = new Depart();
+//        $departs = $depart->departLists();
+        return view('admin.admin.add',['company'=>$com]);
+    }
+
+    /**
+     * 根据公司id查询部门
+     * @param Request $request
+     */
+    public function ajaxDepart(Request $request){
+        $com_id = $request->input('company');
+        if(empty($com_id) || $com_id == 0 || $com_id == ''){
+            return ['code'=>0,'msg'=>'参数错误'];
+        }
+        $depart = new Depart();
+        $list = $depart->getDepartList($com_id);
+        return ['code'=>200,'msg'=>'成功','data'=>$list];
     }
     /**
      * 添加管理员
@@ -39,16 +71,35 @@ class AdminController extends AdminBaseController {
      */
     public function addAdmin(Request $request) {
         $usernmae = $request->input('username');
+        $com_id   = $request->input('company');  //只做参考，实际不操作
         $pass     = $request->input('pass');
+        $departs  = $request->input('depart');
         $admin = new Admin();
+        if($com_id == 0 || $com_id == '' || empty($com_id) || empty($departs) || empty($usernmae) || empty($pass)){
+            return ['code'=>0,'msg'=>'参数错误'];
+        }
         if($admin->adminName($usernmae)){
             return ['code'=>0,'msg'=>'此管理员已存在'];
         }
-        if($admin->adminAdd(['admin_name'=>$usernmae,'admin_password'=>md5($pass)])){
-            return ['code'=>200,'msg'=>'添加成功'];
-        }else{
+        DB::beginTransaction();
+        $admin_id = $admin->adminAdd(['admin_name'=>$usernmae,'admin_password'=>md5($pass),'depart_id'=>$departs]);
+        if(!$admin_id){
+            DB::rollBack();
             return ['code'=>0,'msg'=>'添加失败'];
         }
+        if($admin_id){
+            $depart = new Depart();
+            if($depart->findDepartAdminId($admin_id)){
+                DB::rollBack();
+                return ['code'=>0,'msg'=>'不能重复设置部门负责人'];
+            }
+            if($depart->departEdit($departs,['admin_id'=>$admin_id])){
+                DB::commit();
+                return ['code'=>200,'msg'=>'添加成功'];
+            }
+        }
+        DB::rollBack();
+        return ['code'=>0,'msg'=>'添加失败'];
     }
 
     /**
@@ -60,12 +111,21 @@ class AdminController extends AdminBaseController {
         if($id == '' || empty($id)){
             return ['code'=>0,'msg'=>'参数错误'];
         }
+        DB::beginTransaction();
         $admin =new Admin();
-        if($admin->adminDel($id)){
-            return ['code'=>200,'msg'=>'删除成功'];
-        }else{
+        //删除管理员
+        if(!$admin->adminDel($id)) {
+            DB::rollBack();
             return ['code'=>0,'msg'=>'删除失败'];
         }
+        //删除相关部门
+        $depart = new Depart();
+        if(!$depart->delAdminDepartId($id)) {
+            DB::rollBack();
+            return ['code'=>0,'msg'=>'删除失败'];
+        }
+        DB::commit();
+        return ['code'=>200,'msg'=>'删除成功'];
     }
 
     /**

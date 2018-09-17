@@ -28,9 +28,16 @@
                   <span class="x-red">*</span>省份
               </label>
               <div class="layui-input-inline">
-                  <input type="text" id="L_username" name="cityname" required="" lay-verify="nikename"
-                  autocomplete="off" class="layui-input" placeholder="请输入中国省份....">
+                  <input type="text" id="L_username" name="cityname" required="" lay-verify="cityname" autocomplete="off" class="layui-input" placeholder="请输入中国省份....">
               </div>
+          </div>
+          <div class="layui-form-item">
+            <label for="L_workernum" class="layui-form-label">
+               <span class="x-red">*</span>值班人数
+            </label>
+            <div class="layui-input-inline">
+              <input type="number" id="L_workernum" name="workernum" required="" lay-verify="workernum" autocomplete="off" class="layui-input" placeholder="请输入最少值班人数...">
+            </div>
           </div>
           <div class="layui-form-item">
               <label for="L_repass" class="layui-form-label">
@@ -46,13 +53,26 @@
             $ = layui.jquery;
           var form = layui.form
           ,layer = layui.layer;
+          //验证
+            form.verify({
+                cityname: function(value){
+                    if(value == null || value == ''){
+                        return '省份名称必填';
+                    }
+                },
+                workernum: function(value){
+                    if(value == null || value == ''){
+                        return '值班人数必填';
+                    }
+                }
+            });
           //监听提交
           form.on('submit(add)', function(data){
               token   = $("input[name='_token']").val();
               $.ajax({
                   url:"{{route('admin.city.addCity')}}",
                   type:"post",
-                  data:{cityname:data.field.cityname,_token:token},
+                  data:{cityname:data.field.cityname,workernum:data.field.workernum,_token:token},
                   dataType:"json",
                   success:function (data) {
                       if(data.code == 200){

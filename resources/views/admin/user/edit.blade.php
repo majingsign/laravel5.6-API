@@ -26,12 +26,40 @@
             {{ csrf_field() }}
         <div class="layui-form-item">
               <label for="L_username" class="layui-form-label">
-                  <span class="x-red">*</span>昵称
+                  <span class="x-red">*</span>员工姓名
               </label>
               <div class="layui-input-inline">
                   <input type="text" id="L_username" name="username" required="" value="{{$user->user_name}}" lay-verify="nikename"
                   autocomplete="off" class="layui-input">
               </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label"><span class="x-red">*</span>选择公司</label>
+                <div class="layui-input-inline">
+                    <select name="company" id="company" lay-verify="company" lay-filter="company">
+                        <option value="">--请选择公司--</option>
+                        @if(isset($company) && !empty($company))
+                            @foreach($company as $v)
+                                <option value="{{$v->id}}" @if($v->id == $user->com_id) selected="selected" @endif>{{$v->name}}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label"><span class="x-red">*</span>选择部门</label>
+                <div class="layui-input-inline">
+                    <select name="depart" id="depart" lay-verify="depart">
+                        <option value="">--请选择部门--</option>
+                            @if(isset($departList) && !empty($departList))
+                                <option value="{{$departList->id}}" selected="selected">{{$departList->name}}</option>
+                            @endif
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -46,10 +74,10 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label"><span class="x-red">*</span>选择省份</label>
+            <label class="layui-form-label">选择省份</label>
             <div class="layui-input-block">
                 @foreach($list as $k => $v)
-                      <input type="checkbox" name="city[{{$v->id}}]" @if(in_array($v->id,$usercy))checked  @endif class="city"  lay-verify="city" value="{{$v->id}}" title="{{$v->name}}">
+                      <input type="checkbox" name="city[]" @if(in_array($v->id,$usercy))checked  @endif class="city"  lay-verify="city" value="{{$v->id}}" title="{{$v->name}}">
                 @endforeach
             </div>
         </div>
@@ -59,10 +87,12 @@
                 离职时间
             </label>
             <div class="layui-input-inline">
-                <input type="text" id="levetime" name="leve_time" required="" value="@if($user->leve_time){{date('Y-m-d',$user->leve_time)}} @endif" autocomplete="off" class="layui-input">
+                <input type="text" id="levetime" name="leve_time" value="@if($user->leve_time){{date('Y-m-d',$user->leve_time)}} @endif" autocomplete="off" class="layui-input">
             </div>
             <br/>
-            <span style="font-size: 12px;color: red;">离职当天有上班，第二天不上班。</span>
+            <span style="font-size: 12px;color: red;">
+                离职当天有上班，第二天不上班。如将在本月离职,请在排班中设置为空,如延长了离职时间,请将对应的上班内容补充完整
+            </span>
         </div>
 
         <div class="layui-form-item">
@@ -86,25 +116,61 @@
             $ = layui.jquery;
           var form = layui.form
           ,layer = layui.layer;
+            form.on('select(company)', function(data){
+                com_id = data.value;
+                if(com_id == "" || com_id == 0){
+                    $("#depart").html("<option value=''>--请选择部门--</option>");
+                    form.render('select');
+                    layer.msg('请选择公司');
+                    return false;
+                }
+                $.ajax({
+                    type: "get",
+                    url: "{{route('admin.member.ajaxMemberDepart')}}",
+                    dataType: 'json',
+                    cache: false,
+                    data: {company: com_id},
+                    success: function (data) {
+                        if (data.code == 200) {
+                            var cityhtml = "<option value=''>--请选择部门--</option>";
+                            $.each(data.data, function (k, v) {
+                                cityhtml += "<option value='" + v.id + "'>" + v.name + "</option>";
+                            });
+                            $("#depart").html(cityhtml);
+                            form.render('select');
+                        }
+                    }
+                });
+            });
           //自定义验证规则
           form.verify({
             nikename: function(value){
                 if(value == null || value == ''){
-                    return '昵称必填';
+                    return '员工昵称必填';
                 }
             },
+            company: function(value){
+                 if(value == null || value == '' || value == 0){
+                     return '请选择公司';
+                 }
+            },
+            depart: function(value){
+                 if(value == null || value == '' || value == 0){
+                     return '请选择部门';
+                 }
+            },
             type: function(value){
-              if(value == null || value == ''){
+              if(value == null || value == '' || value == 0){
                 return '请选择类型';
               }
             }
           });
           //监听提交
           form.on('submit(add)', function(data){
-              var checkID = [];//定义一个空数组
+              checkID = [];//定义一个空数组
               if($(".city:checked").length == 0){
-                    alert('未选择省份');
-                    return false;
+                    // alert('未选择省份');
+                    // return false;
               }
               $(".city:checked").each(function(i,v){//把所有被选中的复选框的值存入数组
                     checkID[i] =$(this).val();
@@ -113,7 +179,7 @@
               $.ajax({
                   url:"{{route('admin.member.editMember')}}",
                   type:"post",
-                  data:{id:data.field.id,leve_time:data.field.leve_time,username:data.field.username,type:data.field.type,city:checkID,_token:token},
+                  data:{id:data.field.id,leve_time:data.field.leve_time,company:data.field.company,depart:data.field.depart,username:data.field.username,type:data.field.type,city:checkID,_token:token},
                   dataType:"json",
                   success:function (data) {
                       if(data.code == 200){

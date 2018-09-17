@@ -33,6 +33,14 @@
                   autocomplete="off" class="layui-input" value="{{$citys->name}}" placeholder="请输入中国省份....">
               </div>
           </div>
+        <div class="layui-form-item">
+            <label for="L_workernum" class="layui-form-label">
+                <span class="x-red">*</span>值班人数
+            </label>
+            <div class="layui-input-inline">
+                <input type="number" id="L_workernum" name="workernum" value="{{$citys->min_num}}" required="" lay-verify="workernum" autocomplete="off" class="layui-input" placeholder="请输入最少值班人数...">
+            </div>
+        </div>
           <div class="layui-form-item">
               <label for="L_repass" class="layui-form-label">
               </label>
@@ -47,13 +55,26 @@
             $ = layui.jquery;
           var form = layui.form
           ,layer = layui.layer;
+            //验证
+            form.verify({
+                cityname: function(value){
+                    if(value == null || value == ''){
+                        return '省份名称必填';
+                    }
+                },
+                workernum: function(value){
+                    if(value == null || value == ''){
+                        return '值班人数必填';
+                    }
+                }
+            });
           //监听提交
           form.on('submit(add)', function(data){
               token   = $("input[name='_token']").val();
               $.ajax({
                   url:"{{route('admin.city.saveCity')}}",
                   type:"post",
-                  data:{cityname:data.field.cityname,id:data.field.id,_token:token},
+                  data:{cityname:data.field.cityname,workernum:data.field.workernum,id:data.field.id,_token:token},
                   dataType:"json",
                   success:function (data) {
                       if(data.code == 200){

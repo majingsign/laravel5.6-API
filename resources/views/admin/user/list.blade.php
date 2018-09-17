@@ -45,7 +45,7 @@
         </form>
       </div>
       <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加员工','{{route('admin.member.add')}}',600,400)"><i class="layui-icon"></i>添加</button>
+        <button class="layui-btn" onclick="x_admin_show('添加员工','{{route('admin.member.add')}}',600,500)"><i class="layui-icon"></i>添加</button>
         <span class="x-right" style="line-height:40px">共有数据：{{$list->total()}} 条</span>
       </xblock>
       <table class="layui-table">
@@ -53,6 +53,7 @@
           <tr>
             <th>序号</th>
             <th>用户名</th>
+            <th>部门</th>
             <th>类型</th>
             <th>值班城市</th>
             <th>离职状态</th>
@@ -65,6 +66,7 @@
           <tr>
             <td>{{$key+1}}</td>
             <td>{{$user->user_name}}</td>
+            <td>@if(!empty($user->depart)){{$user->depart}}@else <span style="color: red;">无</span> @endif</td>
             <td>
               @if($user->duty_type == 1)
                 轮休
@@ -78,10 +80,8 @@
                 @else
                     @if(is_array($user->city) || is_object($user->city) )
                         @foreach($user->city as $v)
-                            {{$v->city_name}}
+                            {{$v['city_name']}}
                         @endforeach
-                    @else
-                        无值班城市
                     @endif
                 @endif
             </td>
@@ -92,10 +92,10 @@
                 正常
               @endif
             </td>
-            <td>{{date('Y-m-d H:i:s',$user->input_time)}}</td>
+            <td>{{date('Y-m-d',$user->input_time)}}</td>
             <td>
               @if(($user->is_del == 1) || !empty($user->leve_time))
-                {{date('Y-m-d H:i:s',$user->leve_time)}}
+                {{date('Y-m-d',$user->leve_time)}}
               @else
                 --
               @endif
@@ -104,10 +104,13 @@
               @if($user->is_del == 1)
                 无法操作
               @else
-                <a title="编辑"  onclick="x_admin_show('编辑','{{route('admin.member.edit',['userid'=>$user->user_id])}}',600,400)" href="javascript:;">
+                <a title="编辑"  onclick="x_admin_show('编辑{{$user->user_name}}的资料','{{route('admin.member.edit',['userid'=>$user->user_id])}}',700,600)" href="javascript:;">
                   <i class="layui-icon">&#xe642;</i>
                 </a>
-                <a title="删除" onclick="member_del(this,{{$user->user_id}})" href="javascript:;">
+                <a title="查看考勤"  onclick="x_admin_show('查看{{$user->user_name}}的考勤','{{route('admin.member.records',['userid'=>$user->user_id])}}')" href="javascript:;">
+                  <i class="layui-icon">&#xe705;</i>
+                </a>
+                <a title="删除" onclick="member_del(this,{{$user->user_id}},{{$user -> duty_type}})" href="javascript:;">
                   <i class="layui-icon">&#xe640;</i>
                 </a>
               @endif
@@ -123,17 +126,14 @@
     </div>
     <script>
       /*用户-删除*/
-      function member_del(obj,id){
-          layer.confirm('确认要删除吗？',function(index){
+      function member_del(obj,id,duty_type){
+          layer.confirm('确认要删除吗並且將其本月的排班以及下班的排班刪除？',function(index){
               //发异步删除数据
               $.ajax({
                   url:"{{route('admin.member.del')}}",
                   type:"get",
-                  data:{id:id},
+                  data:{id:id,duty_type:duty_type},
                   dataType:"json",
-                  beforeSend:function () {
-                      // alert('加载中...');
-                  },
                   success:function (data) {
                       if(data.code == 200){
                           alert(data.msg);

@@ -9,6 +9,7 @@
 namespace App\Http\Model;
 
 
+use function foo\func;
 use Illuminate\Support\Facades\DB;
 
 class Member {
@@ -16,13 +17,31 @@ class Member {
     protected  $table = 'user';
 
     /**
+     * 登陆姓名和密码
+     * @param $username
+     */
+    public function loginUser($username){
+        return DB::table($this->table)->select(['user_id','leve_time','password','duty_type','user_name','input_time','is_del','depar_id','com_id'])->where(['user_name'=>$username,'is_del'=>0])->first();
+    }
+
+    /**
      * 全部员工
      * @param string $key 搜索关键词
      * @param string $userstatus  用户状态
+     * @param int $departid  部门id
+     * @param int $com_id    公司id
      * @return bool|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function memberList ($key = '',$userstatus = '0') {
-        $query = DB::table($this->table)->select(['user_id','leve_time','duty_type','user_name','input_time','is_del']);
+    public function memberList ($key = '',$userstatus = '0',$departid = 0,$com_id = 0) {
+        if($departid == 0){
+            $query = DB::table($this->table)->select('user_id','leve_time','duty_type','user_name','input_time','is_del','depar_id','com_id');
+        }else{
+            if(!empty($com_id) || $com_id != 0){
+                $query = DB::table($this->table)->select(['user_id','leve_time','duty_type','user_name','input_time','is_del','depar_id','com_id'])->where(['com_id'=>$com_id]);
+            }else{
+                $query = DB::table($this->table)->select(['user_id','leve_time','duty_type','user_name','input_time','is_del','depar_id','com_id'])->where(['depar_id'=>$departid]);
+            }
+        }
         if(!empty($key) && !empty($userstatus)){
             if($userstatus == 1){
                 //在职员工
@@ -44,10 +63,27 @@ class Member {
                 }
             }
         }
-        $userlist = $query->orderBy('is_del','asc')->paginate();
+        $userlist = $query->orderBy('user_id','asc')->orderBy('is_del','asc')->paginate();
         if(!empty($userlist)){
+            $userid_arr = array();
+            $departid_arr = array();
             foreach ($userlist as $key => $value) {
-                $value->city = DB::table('user_city')->select(['city_name'])->where(['user_id'=>$value->user_id])->get();
+                $userid_arr   [] = $value->user_id;
+                $departid_arr [] = $value->depar_id;
+            }
+            $departList = DB::table('department')->select('id','name')->whereIn('id',$departid_arr)->get()->toArray();
+            $cityList   = DB::table('user_city')->select(['city.name as city_name','user_city.user_id'])->leftJoin('city','city.id','=','user_city.city_id')->whereIn('user_id',$userid_arr)->get();
+            foreach ($userlist as $key => $value) {
+                foreach ($departList as $val) {
+                    if($value->depar_id == $val->id){
+                        $value->depart = $val->name;
+                    }
+                }
+                foreach ($cityList as $val) {
+                    if($value->user_id == $val->user_id){
+                        $value->city[]['city_name'] = $val->city_name;
+                    }
+                }
             }
         }else{
             return false;
@@ -60,7 +96,7 @@ class Member {
      * @param $user_id
      */
     public function memberDel($user_id){
-        return DB::table($this->table)->where(['user_id'=>$user_id])->update(['is_del'=>1]);
+        return DB::table($this->table)->where(['user_id'=>$user_id])->delete();
     }
 
     /**
@@ -93,7 +129,16 @@ class Member {
      * @return \Illuminate\Database\Eloquent\Model|null|object|static
      */
     public function memberFindId($user_id) {
-        return DB::table($this->table)->select(['user_id','duty_type','user_name','input_time','is_del','leve_time'])->where(['user_id'=>$user_id])->first();
+        return DB::table($this->table)->select(['user_id','duty_type','user_name','input_time','is_del','leve_time','depar_id','com_id'])->where(['user_id'=>$user_id])->first();
+    }
+
+
+    /**
+     * 根据部门id删除员工
+     * @param $departid
+     */
+    public function delMemberDepartId($departid){
+        return DB::table($this->table)->where(['depar_id'=>$departid])->delete();
     }
 
     /**
@@ -112,6 +157,35 @@ class Member {
             $sum = DB::table($this->table)->where(['is_del'=>0])->count(); //在职人数
         }
         return $sum;
+    }
+
+
+    public function getUserListByIdList($type = 1){
+      $list = DB::table($this -> table) -> where(['duty_type' => $type]) -> get() -> toArray();
+      $return_arr = [];
+      foreach($list as $value){
+          $return_arr[$value -> user_id] = $value;
+      }
+      return $return_arr;
+    }
+
+
+    public function getQuitStr($type = 1){
+       $last_month_time = strtotime(date('Y-m-1',strtotime('+1 month')));
+       $check_list = DB::table($this -> table)
+                   -> where('leve_time','>=',$last_month_time)
+                   -> where('duty_type','=',$type)
+                   -> get()
+                   -> toArray();
+        $return_arr = [];
+       if(count($check_list) > 0){
+           foreach($check_list as $k =>  $value){
+               $return_arr[$k]['user_name'] = $value -> user_name;
+               $return_arr[$k]['leve_time'] = date('Y-m-d',$value -> leve_time);
+
+           }
+       }
+       return $return_arr;
     }
 
 }
