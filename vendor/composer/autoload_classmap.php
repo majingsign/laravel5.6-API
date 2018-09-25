@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
+    'App\\Csv\\Csv' => $baseDir . '/app/Csv/Csv.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
     'App\\Http\\Controllers\\Admin\\AdminBaseController' => $baseDir . '/app/Http/Controllers/Admin/AdminBaseController.php',
     'App\\Http\\Controllers\\Admin\\AdminController' => $baseDir . '/app/Http/Controllers/Admin/AdminController.php',
@@ -20,6 +21,7 @@ return array(
     'App\\Http\\Controllers\\Admin\\LoginController' => $baseDir . '/app/Http/Controllers/Admin/LoginController.php',
     'App\\Http\\Controllers\\Admin\\MemberController' => $baseDir . '/app/Http/Controllers/Admin/MemberController.php',
     'App\\Http\\Controllers\\Admin\\MenuController' => $baseDir . '/app/Http/Controllers/Admin/MenuController.php',
+    'App\\Http\\Controllers\\Admin\\RecordsController' => $baseDir . '/app/Http/Controllers/Admin/RecordsController.php',
     'App\\Http\\Controllers\\Admin\\RotationController' => $baseDir . '/app/Http/Controllers/Admin/RotationController.php',
     'App\\Http\\Controllers\\Admin\\ShiftController' => $baseDir . '/app/Http/Controllers/Admin/ShiftController.php',
     'App\\Http\\Controllers\\Api\\ApiBaseController' => $baseDir . '/app/Http/Controllers/Api/ApiBaseController.php',
@@ -31,6 +33,7 @@ return array(
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
     'App\\Http\\Controllers\\Index\\IndexBaseController' => $baseDir . '/app/Http/Controllers/Index/IndexBaseController.php',
     'App\\Http\\Controllers\\Index\\IndexController' => $baseDir . '/app/Http/Controllers/Index/IndexController.php',
+    'App\\Http\\Controllers\\Index\\LoginController' => $baseDir . '/app/Http/Controllers/Index/LoginController.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\CheckMenu' => $baseDir . '/app/Http/Middleware/CheckMenu.php',
     'App\\Http\\Middleware\\EncryptCookies' => $baseDir . '/app/Http/Middleware/EncryptCookies.php',
@@ -46,6 +49,7 @@ return array(
     'App\\Http\\Model\\Inverted' => $baseDir . '/app/Http/Model/Inverted.php',
     'App\\Http\\Model\\Member' => $baseDir . '/app/Http/Model/Member.php',
     'App\\Http\\Model\\Menu' => $baseDir . '/app/Http/Model/Menu.php',
+    'App\\Http\\Model\\Qingjia' => $baseDir . '/app/Http/Model/Qingjia.php',
     'App\\Http\\Model\\Records' => $baseDir . '/app/Http/Model/Records.php',
     'App\\Http\\Model\\Shift' => $baseDir . '/app/Http/Model/Shift.php',
     'App\\Http\\Model\\UserCity' => $baseDir . '/app/Http/Model/UserCity.php',

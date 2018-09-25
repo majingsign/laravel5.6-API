@@ -31,21 +31,22 @@
     </div>
     <div class="x-body">
       <div class="layui-row">
-        <form class="layui-form layui-col-md12 x-so" method="get" action="{{route('admin.member.list')}}">
+        <form class="layui-form layui-col-md12 x-so" id="js-form" method="get" action="{{route('admin.member.list')}}">
           <input type="text" name="username"  value="{{$username}}" placeholder="请输入用户名" autocomplete="off" class="layui-input">
           <div class="layui-input-inline" style="margin-top: -3px;">
             <select name="userstatus">
-              <option value="">请选择市</option>
+              <option value="">请选择值班</option>
               @foreach($status as $k => $v)
                   <option value="{{$k}}" @if($userstatus == $k) selected="selected" @endif>{{$v}}</option>
               @endforeach
             </select>
           </div>
+          <input type="hidden" name="page" id="page" value="{{$list->currentPage()}}">
           <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
         </form>
       </div>
       <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加员工','{{route('admin.member.add')}}',600,500)"><i class="layui-icon"></i>添加</button>
+        <button class="layui-btn" onclick="x_admin_show('添加员工','{{route('admin.member.add')}}',600,700)"><i class="layui-icon"></i>添加</button>
         <span class="x-right" style="line-height:40px">共有数据：{{$list->total()}} 条</span>
       </xblock>
       <table class="layui-table">
@@ -113,6 +114,13 @@
                 <a title="删除" onclick="member_del(this,{{$user->user_id}},{{$user -> duty_type}})" href="javascript:;">
                   <i class="layui-icon">&#xe640;</i>
                 </a>
+                <a title="请假审批"  onclick="x_admin_show('查看{{$user->user_name}}的审批','{{route('admin.member.qingjia',['userid'=>$user->user_id])}}')" href="javascript:;">
+                  @if(isset($user->is_pass) && $user->is_pass == 0)
+                    <i class="layui-icon" style="color: red;">&#xe6b2;<span class="layui-badge-dot"></span></i>
+                  @else
+                    <i class="layui-icon">&#xe6b2;</i>
+                  @endif
+                </a>
               @endif
 
             </td>
@@ -125,6 +133,22 @@
       </div>
     </div>
     <script>
+        $(function () {
+            $(".pagination").find("a").attr("href","javascript:void(0);");
+            $(".pagination").find('a').click(function () {
+                var str = $(this).text();
+                var page = parseInt($("#page").val());
+                if(str == "«"){
+                    $("#page").val(page-1);
+                }else if(str == "»"){
+                    $("#page").val(page+1);
+                }else{
+                    $("#page").val($(this).text());
+                }
+                $("#js-form").submit();
+            })
+        })
+
       /*用户-删除*/
       function member_del(obj,id,duty_type){
           layer.confirm('确认要删除吗並且將其本月的排班以及下班的排班刪除？',function(index){

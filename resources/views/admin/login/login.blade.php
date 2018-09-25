@@ -22,16 +22,15 @@
         <div id="darkbannerwrap"></div>
         <form method="post" class="layui-form" action="{{route('admin.loginAction')}}" >
             {{ csrf_field() }}
-            <input name="username" placeholder="用户名" lay-verify="required" type="text" class="layui-input" >
+            <input name="username" autocomplete="off" placeholder="用户名" lay-verify="required" type="text" class="layui-input" >
             <hr class="hr15">
-            <input name="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
+            <input name="password" lay-verify="required" autocomplete="off" placeholder="密码"  type="password" class="layui-input">
             <hr class="hr15">
             <input value="登录" lay-submit lay-filter="login" id="login" style="width:100%;" type="button">
             <hr class="hr20" >
-            <a href="{{route('index.index.index')}}"><input value="员工打卡" style="width:100%;" type="button"></a>
+            <span style="float: right;font-family: 微软雅黑;color: #000000"><i class="layui-icon">&#xe623;&#xe623;&#xe623;</i><a href="{{route('index.index.index')}}">去打卡</a></span>
         </form>
     </div>
-
     <script>
         $(function  () {
             $("input[name='password']").keydown(function(e){

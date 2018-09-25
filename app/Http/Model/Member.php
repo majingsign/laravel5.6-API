@@ -16,6 +16,20 @@ class Member {
 
     protected  $table = 'user';
 
+
+    /**
+     * openid登陆
+     * @param $openid
+     * @return bool|\Illuminate\Database\Eloquent\Model|null|object|static
+     */
+    public function openidLogin($openid) {
+        if($openid){
+           return DB::table($this->table)->select(['user_id','user_name','openid'])->where(['openid'=>$openid])->first();
+        }else{
+            return false;
+        }
+    }
+
     /**
      * 登陆姓名和密码
      * @param $username
@@ -27,7 +41,7 @@ class Member {
     /**
      * 全部员工
      * @param string $key 搜索关键词
-     * @param string $userstatus  用户状态
+     * @param string $userstatus  值班状态
      * @param int $departid  部门id
      * @param int $com_id    公司id
      * @return bool|\Illuminate\Contracts\Pagination\LengthAwarePaginator
@@ -45,10 +59,10 @@ class Member {
         if(!empty($key) && !empty($userstatus)){
             if($userstatus == 1){
                 //在职员工
-                $query->where('user_name','like','%'.$key.'%')->where(['is_del'=>0]);
+                $query->where('user_name','like','%'.$key.'%')->where(['duty_type'=>1]);
                 //离职员工
             }else if($userstatus == 2){
-                $query->where('user_name','like','%'.$key.'%')->where(['is_del'=>1]);
+                $query->where('user_name','like','%'.$key.'%')->where(['duty_type'=>2]);
             }
         }
         if(!empty($key) || !empty($userstatus)){
@@ -57,9 +71,9 @@ class Member {
             }
             if(!empty($userstatus)){
                 if($userstatus == 1){
-                    $query->where(['is_del'=>0]);//在职员工
+                    $query->where(['duty_type'=>1]);//轮休员工
                 }else if($userstatus == 2){
-                    $query->where(['is_del'=>1]); //离职员工
+                    $query->where(['duty_type'=>2]); //倒班员工
                 }
             }
         }
@@ -73,6 +87,7 @@ class Member {
             }
             $departList = DB::table('department')->select('id','name')->whereIn('id',$departid_arr)->get()->toArray();
             $cityList   = DB::table('user_city')->select(['city.name as city_name','user_city.user_id'])->leftJoin('city','city.id','=','user_city.city_id')->whereIn('user_id',$userid_arr)->get();
+            $qingjiaList= DB::table('qingjia')->select(['is_pass','userid'])->whereIn('userid',$userid_arr)->get();
             foreach ($userlist as $key => $value) {
                 foreach ($departList as $val) {
                     if($value->depar_id == $val->id){
@@ -84,6 +99,11 @@ class Member {
                         $value->city[]['city_name'] = $val->city_name;
                     }
                 }
+               foreach ($qingjiaList as $v){
+                   if($value->user_id == $v->userid){
+                       $value->is_pass = $v->is_pass;
+                   }
+               }
             }
         }else{
             return false;
@@ -105,6 +125,15 @@ class Member {
      */
     public function memberAdd($data){
         return DB::table($this->table)->insert($data);
+    }
+
+    /**
+     * 修改密码
+     * @param $userid
+     * @param $data
+     */
+    public function editPassword($userid,$data){
+        return DB::table($this->table)->where(['user_id'=>$userid])->update($data);
     }
 
     /**
@@ -161,7 +190,12 @@ class Member {
 
 
     public function getUserListByIdList($type = 1){
-      $list = DB::table($this -> table) -> where(['duty_type' => $type]) -> get() -> toArray();
+        if($type == 'all'){
+            $list = DB::table($this -> table) ->  get() -> toArray();
+        } else {
+            $list = DB::table($this -> table) -> where(['duty_type' => $type]) -> get() -> toArray();
+        }
+
       $return_arr = [];
       foreach($list as $value){
           $return_arr[$value -> user_id] = $value;

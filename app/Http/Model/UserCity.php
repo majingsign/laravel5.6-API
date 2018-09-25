@@ -91,13 +91,13 @@ class UserCity {
                    unset($city_list[$value ->city_id  ]);
                }
                if($value -> count <=1){
-                   $return_arr = ['code' => 0,'message' => '城市名字为'.$value -> name .'分配的员工数量为'.$value -> count.',小于2个人'];
+//                   $return_arr = ['code' => 0,'message' => '城市名字为'.$value -> name .'分配的员工数量为'.$value -> count.',小于2个人'];
                    break;
                }
            }
            if(!empty($city_list)){
              foreach($city_list as $city){
-                 $return_arr = ['code' => 0,'message' => '城市名字为'.$city-> name .'分配的员工数量为0,请重新分配'];
+//                 $return_arr = ['code' => 0,'message' => '城市名字为'.$city-> name .'分配的员工数量为0,请重新分配'];
              }
            }
        }
@@ -119,7 +119,7 @@ class UserCity {
       if(count($list) > 0){
             foreach($list as $value){
                 if(!array_key_exists($value -> user_id,$user_list)){
-                    return ['code' => 0,'message' => '请给所有的员工分配对应城市'];
+//                    return ['code' => 0,'message' => '请给所有的员工分配对应城市'];
                 }
             }
         }

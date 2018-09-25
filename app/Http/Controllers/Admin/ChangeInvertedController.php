@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Logic\InvertedLogic;
 use App\Logic\ExcelLogic;
+use App\Csv\Csv;
 
 /** 倒班的排班
  * Class ChangeInvertedController
@@ -28,21 +29,19 @@ class ChangeInvertedController extends AdminBaseController
         $user_list = $member -> getUserListByIdList(2);
         $list_arr = [];
         if(count($list) > 0){
-            foreach($list as $value){
-                $list_arr[$value -> user_id]['work'] = json_decode($value -> scheduling);
-                $list_arr[$value -> user_id]['user_name'] = $user_list[$value -> user_id]->user_name;
+            foreach($list as  $key => $value){
+                if(array_key_exists($value -> user_id,$user_list)){
+                    $list_arr[$value -> user_id]['work'] = json_decode($value -> scheduling);
+                    $list_arr[$value -> user_id]['user_name'] = $user_list[$value -> user_id]->user_name;
+                }
+
             }
         }
         $week_list = $userWork -> getMonthWeek(0);
         $type_list = DB::table('type') -> get() -> toArray();
-        //判断下个月的逻辑
-        $next_time = $userWork -> getNextMonthLastDay(date('Y-m-d'));
-        $next_table_name  =  $invertedLogic -> getTableName(date('Y_m',strtotime($next_time)));
-        $next_list = DB::table($next_table_name) -> get() -> toArray();
         return view('admin.changeinverted.index',[
             'list'      => $list_arr,
             'week_list' => $week_list,
-            'next_list' => $next_list,
             'type_list' => $type_list
         ]);
     }
@@ -262,6 +261,93 @@ class ChangeInvertedController extends AdminBaseController
         }
     }
 
+
+
+    public function importList(){
+        return view('admin.changeinverted.import');
+    }
+
+
+
+
+    /** 提交导入的数据信息
+     * @param Request $request
+     * @param ShiftLogic $shiftLogic
+     * @return $this
+     */
+    public function importlistpost(Request $request,InvertedLogic $invertedLogic){
+        try {
+            //数据导入方式
+            $max_day = date('t',time());
+            ini_set("max_execution_time", "1800");
+            $myfile = $request -> file('file');
+            if (empty($myfile)) {
+                echo '<script>alert("温馨提示：没有上传文件");parent.location.href = "/admin/changeinverted/index";</script>';
+                exit;
+            }
+            //获取文件名称
+            $fileName = $_FILES['file']['name'];
+            $csv = new Csv();
+            $data = $csv->import($myfile, $fileName,intval($max_day + 1));
+            if ($data['code'] == -1) {
+                exit('温馨提示：' . $data['message']);
+            }
+            $data = $data['data'];
+            //去除空元素
+            $newRes = [];
+            foreach ($data as $key => $val) {
+                if (array_filter($val)) {
+                    $newRes[] = array_filter($val);
+                }
+            }
+            //获取表名
+            $table_name  =  $invertedLogic -> getTableName(date('Y_m',time()));
+            DB::beginTransaction();
+            $rst1 = DB::table($table_name) -> where('id','>',0) -> delete();
+            $inser_data = [];
+            foreach($newRes as $value){
+                //判断是否有空的数据
+                $user_name = trim($value[0]);
+                if(intval($max_day + 1) != count($value)){
+                    DB::rollBack();
+                    $str = '用户名为'.$user_name.'的排班数据,有为空的数据,请核对后再进行添加';
+                    echo '<script>alert("'.$str .'");parent.location.href = "/admin/changeinverted/index";</script>';
+                    exit;
+                }
+                $user_id = DB::table('user')
+                    -> where('user_name','=',$user_name)
+                    -> where('duty_type','=',2)
+                    -> value('user_id');
+                if(!$user_id){
+                    DB::rollBack();
+                    $str = '用户名为'.$user_name.'的员工不存在, 请核对后再进行添加';
+                    echo '<script>alert("'.$str .'");parent.location.href = "/admin/changeinverted/index";</script>';
+                    exit;
+                }
+                unset($value[0]);
+                $inser_data[] = [
+                    'user_id'    => $user_id,
+                    'scheduling'  => json_encode(array_values($value)),
+                    'create_time' => time(),
+                ];
+
+            };
+            $rst2 = DB::table($table_name) -> insert($inser_data);
+            if($rst1 !== false && $rst2){
+                DB::commit();
+                echo '<script>alert("导入成功");parent.location.href = "/admin/changeinverted/index";</script>';
+                exit;
+            } else {
+                DB::rollBack();
+                echo '<script>alert("导入失败");parent.location.href = "/admin/changeinverted/index";</script>';
+                exit;
+            }
+
+        } catch (\Exception $ex) {
+            echo '<script>alert("'.$ex ->getMessage().'");parent.location.href = "/admin/changeinverted/index";</script>';
+            exit;
+        }
+    }
 
 
 

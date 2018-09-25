@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
-  
   <head>
     <meta charset="UTF-8">
     <title>员工打卡</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    {{--<meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />--}}
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="{{ asset('admin/css/font.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/xadmin.css') }}">
@@ -19,21 +18,16 @@
       <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  
   <body class="layui-anim layui-anim-up">
-  <br/>
-  <br/>
-    <div class="x-nav">
-
-    </div>
-
     <br/>
     <br/>
     <div class="x-body">
       <div class="layui-row" style="text-align: center;">
+        <span style="color: red;font-size: 12px;">温馨提示:请记得打卡哦!</span><div style="margin-top: 20px;"></div>
         <form class="layui-form layui-col-md12 x-so">
           {{ csrf_field() }}
-          <input type="text" name="username" id="username" lay-verify="username" placeholder="请输入姓名打卡" style="width: 200px;" autocomplete="off" class="layui-input">
+          <input type="text" name="username" id="username" value="{{Session::get('membername')}}" lay-verify="username" placeholder="请输入姓名打卡" style="width: 200px;" autocomplete="off" class="layui-input">
+          <input type="text" id="starttime" class="layui-input" name="starttime" lay-verify="starttime" autocomplete="off" placeholder="请选择打卡时间">
           <button class="layui-btn"  lay-submit="" lay-filter="search"><i class="layui-icon">&#xe664;</i>&nbsp;&nbsp;确认打卡</button>
         </form>
       </div>
@@ -60,6 +54,14 @@
 
     </div>
     <script type="application/javascript">
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#starttime',
+                type: 'datetime'
+            });
+
+        });
       $(function () {
           layui.use(['form','layer'], function(){
               $ = layui.jquery;
@@ -79,7 +81,7 @@
                   $.ajax({
                       url:"{{route('index.index.memberLogin')}}",
                       type:"post",
-                      data:{username:username,_token:token},
+                      data:{username:username,starttime:data.field.starttime,_token:token},
                       dataType:"json",
                       success:function (data) {
                           if(data.code == 200) {

@@ -11,14 +11,32 @@
 |
 */
 Route::get('/', function () {
-    return view('index.index.member');
+    return redirect(route('index.index.index'));
 });
 Route::get('/user/index','\App\Http\Controllers\IndexController@index');
 
 
 //员工打卡首页
 Route::get('/index/index/index','\App\Http\Controllers\Index\IndexController@index')->name('index.index.index');
+Route::any('/index/index/checkWxPost','\App\Http\Controllers\Index\IndexController@checkWxPost')->name('index.index.checkWxPost');
 Route::post('/index/index/memberLogin','\App\Http\Controllers\Index\IndexController@memberLogin')->name('index.index.memberLogin');
+Route::any('/index/index/member','\App\Http\Controllers\Index\IndexController@member')->name('index.index.member');
+Route::any('/index/index/pwd','\App\Http\Controllers\Index\IndexController@pwd')->name('index.index.pwd');
+Route::any('/index/index/savepwd','\App\Http\Controllers\Index\IndexController@savepwd')->name('index.index.savepwd');
+Route::any('/index/index/weixinLogin','\App\Http\Controllers\Index\IndexController@weixinLogin')->name('index.index.weixinLogin'); //扫码登陆
+
+//前台页面
+Route::any('/index/login/login','\App\Http\Controllers\Index\LoginController@login')->name('index.login.login');
+Route::any('/index/login/loginAction','\App\Http\Controllers\Index\LoginController@loginAction')->name('index.login.loginAction');
+Route::any('/index/login/loginOut','\App\Http\Controllers\Index\LoginController@loginOut')->name('index.login.loginOut');
+
+//考勤
+Route::any('/index/records/records','\App\Http\Controllers\Index\RecordsController@records')->name('index.records.records');
+
+//请假
+Route::any('/index/qingjia/list','\App\Http\Controllers\Index\QingjiaController@list')->name('index.qingjia.list');
+Route::any('/index/qingjia/add','\App\Http\Controllers\Index\QingjiaController@add')->name('index.qingjia.add');
+Route::any('/index/qingjia/QingjiaAdd','\App\Http\Controllers\Index\QingjiaController@QingjiaAdd')->name('index.qingjia.QingjiaAdd');
 
 
 /*********************************后台路由开始***********************************************/
@@ -79,6 +97,10 @@ Route::group(['middleware' => 'admin.CheckMenu'],function() {
     Route::any('/admin/member/ajaxMemberDepart','\App\Http\Controllers\Admin\MemberController@ajaxMemberDepart')->name('admin.member.ajaxMemberDepart');
     Route::any('/admin/member/records','\App\Http\Controllers\Admin\MemberController@records')->name('admin.member.records');
     Route::any('/admin/member/recordsList','\App\Http\Controllers\Admin\MemberController@recordsList')->name('admin.member.recordsList');
+    Route::any('/admin/member/qingjia','\App\Http\Controllers\Admin\MemberController@qingjia')->name('admin.member.qingjia');
+    Route::any('/admin/member/qingjiasaveUser','\App\Http\Controllers\Admin\MemberController@qingjiasaveUser')->name('admin.member.qingjiasaveUser');
+    Route::any('/admin/member/qingjiasave','\App\Http\Controllers\Admin\MemberController@qingjiasave')->name('admin.member.qingjiasave');
+    Route::any('/admin/member/ajaxPass','\App\Http\Controllers\Admin\MemberController@ajaxPass')->name('admin.member.ajaxPass');
 
     //公司管理
     Route::any('/admin/company/list','\App\Http\Controllers\Admin\CompanyController@list')->name('admin.company.list');
@@ -132,6 +154,10 @@ Route::group(['middleware' => 'admin.CheckMenu'],function() {
     Route::get('admin/rotation/nextrexcelport','\App\Http\Controllers\Admin\RotationController@nextRexcelPort') ->name('admin.rotation.nextrexcelport');
     //废除下个月的轮休排班数据
     Route::get('admin/rotation/discardedgenerate','\App\Http\Controllers\Admin\RotationController@discardedGenerate') ->name('admin.rotation.discardedgenerate');
+    //导入轮班数据
+    Route::get('admin/rotation/importlist','\App\Http\Controllers\Admin\RotationController@importList') ->name('admin.rotation.importlist');
+    //导入轮班数据(保存)
+    Route::post('admin/rotation/importlistpost','\App\Http\Controllers\Admin\RotationController@importListPost') ->name('admin.rotation.importlistpost');
 
 
 
@@ -162,6 +188,19 @@ Route::group(['middleware' => 'admin.CheckMenu'],function() {
     Route::get('admin/changeinverted/nextrexcelport','\App\Http\Controllers\Admin\ChangeInvertedController@nextRexcelPort') ->name('admin.changeinverted.nextrexcelport');
     //废除下个月的倒班排班数据
     Route::get('admin/changeinverted/discardedgenerate','\App\Http\Controllers\Admin\ChangeInvertedController@discardedGenerate') ->name('admin.changeinverted.discardedgenerate');
+    //导入倒班数据
+    Route::get('admin/changeinverted/importlist','\App\Http\Controllers\Admin\ChangeInvertedController@importList') ->name('admin.changeinverted.importlist');
+    //导入倒班数据(保存)
+    Route::post('admin/changeinverted/importlistpost','\App\Http\Controllers\Admin\ChangeInvertedController@importListPost') ->name('admin.changeinverted.importlistpost');
+
+
+    /**
+     * 打卡
+     */
+    //获取上个月的打卡内容信息
+    Route::get('admin/records/getlastmonthlsit','\App\Http\Controllers\Admin\RecordsController@getLastMonthlsit') ->name('admin.records.getlastmonthlsit');
+
+
     /*********************************后台路由结束***********************************************/
 });
 

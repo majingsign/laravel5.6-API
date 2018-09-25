@@ -13,6 +13,8 @@ use App\Http\Model\City;
 use App\Http\Model\Company;
 use App\Http\Model\Depart;
 use App\Http\Model\Member;
+use App\Http\Model\Qingjia;
+use Illuminate\Support\Facades\Session;
 
 class IndexController extends AdminBaseController {
 
@@ -34,6 +36,21 @@ class IndexController extends AdminBaseController {
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|\think\response\View
      */
     public function welcome (){
+        //查询是否有未审批的通知
+        $qingjia = new Qingjia();
+        $act = $this->checkDepart(); //判断是超级管理员  不是超级管理员就是部门负责人
+        $comAdmin = Session::get('comAdmin');  //企业负责人
+        if($act == false){
+            $list = $qingjia->qjListNoPass();
+        }else{
+            //判断是否是企业负责人
+            if(!empty($comAdmin) || $comAdmin != ''){
+                $list = $qingjia->qjListNoPass($comAdmin,$act);
+            }else{
+                $list = $qingjia->qjListNoPass(0,$act);
+            }
+        }
+
         $member = new Member();
         $city   = new City();
         $depart = new Depart();
@@ -47,7 +64,7 @@ class IndexController extends AdminBaseController {
         $citySum      = $city->citySum();
         $companySum   = $company->companySum();
         $adminSum     = $admin->adminSum();
-        return view('admin.index.welcome',['sum_shouqian'=>$sum_shouqian,'sum_beian'=>$sum_beian,'sum_del'=>$sum_del,'sum_worker'=>$sum_worker,'citySum'=>$citySum,'departSum'=>$departSum,'companySum'=>$companySum,'adminSum'=>$adminSum]);
+        return view('admin.index.welcome',['list'=>$list,'sum_shouqian'=>$sum_shouqian,'sum_beian'=>$sum_beian,'sum_del'=>$sum_del,'sum_worker'=>$sum_worker,'citySum'=>$citySum,'departSum'=>$departSum,'companySum'=>$companySum,'adminSum'=>$adminSum]);
     }
 
 }

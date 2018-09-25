@@ -24,7 +24,13 @@
 
     <div class="x-body">
       <div class="layui-row">
-        <form class="layui-form layui-col-md12 x-so" action="{{route('admin.member.recordsList')}}" method="get">
+        <div>
+          <a href="{{route('admin.records.getlastmonthlsit')}}">
+            <button class="import layui-btn layui-btn-radius" href="javascript:;">获取上个月打卡信息</button>
+          </a>
+
+        </div>
+        <form class="layui-form layui-col-md12 x-so" action="{{route('admin.member.recordsList')}}" method="get" style="margin-top: 20px;">
           <input class="layui-input" placeholder="开始日" value="{{$start}}" autocomplete="off" name="start" id="start">
           <input class="layui-input" placeholder="截止日" value="{{$end}}" autocomplete="off" name="end" id="end">
           {{--<input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">--}}

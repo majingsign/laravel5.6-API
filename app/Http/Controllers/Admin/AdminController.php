@@ -32,6 +32,7 @@ class AdminController extends AdminBaseController {
         }else{
             $list = $admin->adminList(0,$adminname);
         }
+
         return view('admin.admin.list',['list'=>$list,'admin'=>$adminname]);
     }
 

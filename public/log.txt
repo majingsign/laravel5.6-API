@@ -1,0 +1,1 @@
+{"username":"\u6d4b\u8bd54322","openid":"od_gR09LWtzew1ki9T2uYNg7nQj0","type":"2","company":"6","depart":"18","city":"1","addtime":"2018-09-21","_token":"Z8qU44mggaFHjKy55aksCDOoZ6db7tllWZFzEvJi","is_generate":"1","s":"\/\/admin\/member\/addMember"}

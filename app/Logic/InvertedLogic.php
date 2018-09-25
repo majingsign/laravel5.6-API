@@ -169,5 +169,93 @@ class InvertedLogic
     }
 
 
+    /** 判断每天都有两个E班
+     * @param $list
+     */
+    public function getSecondE($list){
+        $last_day = date('t',time());
+       //判断每天都有几个人休息, 每天几个E班,每个人在那几天在休息
+        $check_arr = [
+            'e_list'        => [],
+            'user_day_list' => [],
+            'day_rest'      => [],
+            'c1_list'       => []
+        ];
+        foreach($list as  $user_id => $value){
+           foreach($value['work'] as  $day => $item){
+               if($item == '休'){
+                  $check_arr['day_rest'][$day][] = $user_id;
+              }
+              if($item == 'E'){
+                  $check_arr['e_list'][$day][] = $user_id;
+              }
+              if($item == 'C1'){
+                  $check_arr['c1_list'][$day][] = $user_id;
+              }
+              $check_arr['user_day_list'][$user_id][] = $item;
+           }
+        }
+        ksort($check_arr['e_list']);
+        ksort($check_arr['day_rest']);
+        ksort($check_arr['c1_list']);
+
+$change_arr = [];
+        //上E班人数不足的天数
+       for($i = 0 ; $i <= $last_day-1 ;++ $i){
+           if(array_key_exists($i,$check_arr['e_list'])){
+               //少于2个人上E班
+               if(count($check_arr['e_list'][$i]) < 2){
+                   $change_arr[$i] = count($check_arr['e_list'][$i]);
+               }
+           } else {
+               //没有人上E班
+               $change_arr[$i] = 2;
+           }
+       }
+
+
+ //替换掉可以替换掉的内容
+        foreach($change_arr as $day => $num){
+           $rest_arr = $check_arr['day_rest'][$day];
+           //>>当天的休息人数E班, 小于替换的人数的时候
+          if(count($rest_arr) > $num){
+              $rand_keys  = array_rand($rest_arr,$num);
+              if($num == 1){
+                  $uid_arr[] = $rest_arr[$rand_keys];
+              } else {
+                  $uid_arr[] =  $rest_arr[$rand_keys[0]];
+                  $uid_arr[] =  $rest_arr[$rand_keys[1]];
+              }
+              foreach($uid_arr as $uid){
+                  $check_return_arr =  $this -> replaceClass($check_arr['user_day_list'][$uid],$day);
+                  $check_arr['user_day_list'][$uid] = $check_return_arr;
+              }
+          }
+
+
+        }
+
+   }
+
+    private  function replaceClass($user_day_list,$day){
+         $return_arr = $user_day_list;
+         foreach($user_day_list as $k_day  =>  $value){
+             $flag = false;
+             if($flag){
+                 if($value == '休'){
+                     $return_arr[$k_day] = 'E';
+                     $flag = true;
+                 }
+             }
+             if($k_day == $day){
+                   $return_arr[$k_day] = 'E';
+               }
+         }
+         return $return_arr;
+    }
+
+
+
+
 
 }

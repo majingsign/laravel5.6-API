@@ -6,7 +6,7 @@
  * Time: 16:30
  */
 
-namespace app\Logic;
+namespace App\Logic;
 use App\Http\Model\Shift;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -234,7 +234,7 @@ class ShiftLogic
                 $table->engine = 'InnoDB';
                 $table->increments('id');
                 $table->integer('user_id');
-                $table->string('scheduling',255);
+                $table->text('scheduling');
                 $table->string('last_day',10);
                 $table->integer('create_time');
             });

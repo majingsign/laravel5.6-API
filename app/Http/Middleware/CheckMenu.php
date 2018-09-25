@@ -19,7 +19,7 @@ class CheckMenu {
             'admin/index','admin/welcome','admin/login','admin/loginout','admin/loginAction','admin/error/index','admin/admin/ajaxDepart','admin/member/ajaxMemberDepart',
             'admin/admin/savepwd','admin/admin/addAdmin','admin/menu/addMenu','admin/menu/saveMenu','admin/depart/addDepart','admin/depart/saveDepart','admin/member/addMember',
             'admin/member/editMember','admin/member/ajaxMemberDepart','admin/company/addCompany','admin/company/saveCompany','admin/city/addCity','admin/city/saveCity',
-            'admin/duty/addDuty','admin/duty/saveDuty','admin/rotation/shiftsave'
+            'admin/duty/addDuty','admin/duty/saveDuty','admin/rotation/shiftsave','admin/member/qingjiasave','admin/member/qingjiasaveUser','admin/member/ajaxPass'
         ];
         $data = $this->menuCheck(1);
         if(!empty($data)) {

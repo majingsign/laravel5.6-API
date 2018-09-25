@@ -85,7 +85,7 @@ class Records {
      * @param $userid
      */
     public function getRecordsUsersAll($userid){
-        return DB::table($this->table)->select('id','user_id','username','clock_time','com_id')->where(['user_id'=>$userid])->orderBy('id','desc')->get()->toArray();
+        return DB::table($this->table)->select('id','user_id','username','clock_time','com_id')->where(['user_id'=>$userid])->orderBy('id','desc')->paginate(20);
     }
 
 

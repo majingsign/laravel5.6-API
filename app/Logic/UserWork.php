@@ -46,6 +46,14 @@ class UserWork
         return  date('Y-m-01', strtotime(date("Y-m-d")));
     }
 
+    /**
+     * 获取上个月的月份
+     */
+    public function getLastMonth(){
+        echo date('Y_m', strtotime('-1 month'));
+    }
+
+
     /** 获取下个月那些员工在上班
      * @param $type 1为轮休 2为倒班
      */
@@ -165,13 +173,25 @@ class UserWork
         $total_day =  date('t',time());
         $return_arr = [];
         for ($i= $start;$i <= $end;$i += 86400){
-            if($i <= $now_time){
+            if($i < $now_time){
                 $return_arr[] = '---';
             }
         }
         $check_arr = ["T","T","T","T","T","休","休","T","T","T","T","T","休","休","T","T","T","T","T","休","休","T","T","T","T","T","休","休","T","T","T","T","T","休","休"];
         $arr = array_merge($return_arr,$check_arr);
-        return array_slice($arr,0,$total_day-1);
+        return array_slice($arr,0,$total_day);
+    }
+
+
+
+    public function getLastDay(){
+        $start_time =  strtotime(date('Y-m-01', strtotime('-1 month')));
+        $end_time = strtotime(date('Y-m-t', strtotime('-1 month')));
+        $return_arr = [];
+        for($i = $start_time;$i<= $end_time;$i+=86400){
+            $return_arr[] = date('m-d',$i);
+        }
+        return $return_arr;
     }
 
 

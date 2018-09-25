@@ -22,6 +22,7 @@ class AdminBaseController extends Controller {
 
     protected $type   = ['1'=>'轮休','2'=>'倒班'];
     protected $status = ['1'=>'在职','2'=>'离职'];
+    protected $qingjia= ['1'=>'事假','2'=>'病假','3'=>'婚假','4'=>'产假','5'=>'丧假','6'=>'其他'];
 
     /**
      * 检测用户是否登陆

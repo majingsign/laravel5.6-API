@@ -22,6 +22,15 @@
   
   <body class="layui-anim layui-anim-up">
     <div class="x-body">
+      <div class="layui-row" style="display: flex">
+
+
+
+
+
+      </div>
+
+
       <table class="layui-table">
         <thead>
           <tr>

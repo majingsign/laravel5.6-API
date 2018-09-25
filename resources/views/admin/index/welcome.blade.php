@@ -14,7 +14,47 @@
     <body>
     <div class="x-body layui-anim layui-anim-up">
         <blockquote class="layui-elem-quote">欢迎管理员：
-            <span class="x-red">{{Session::get('username')}}</span>！当前时间:<?php echo date('Y-m-d H:i:s',time())?></blockquote>
+            <span class="x-red">{{Session::get('username')}}</span>！当前时间:<?php echo date('Y-m-d H:i:s',time())?>
+        </blockquote>
+        <fieldset class="layui-elem-field">
+            @if(!empty($list))
+            <legend style="color: red;">系统通知</legend>
+            <div class="layui-field-box">
+                <table class="layui-table" lay-size="sm">
+                    <colgroup>
+                        <col width="150">
+                        <col width="200">
+                        <col>
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>公司</th>
+                        <th>部门</th>
+                        <th>姓名</th>
+                        <th>申请时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($list as $key => $value)
+                        <tr>
+                            <td>{{$key+1}}</td>
+                            <td>{{$value->com_name}}</td>
+                            <td>{{$value->depart_name}}</td>
+                            <td>{{$value->username}}</td>
+                            <td>{{date('Y-m-d H:i',$value->create_at)}}</td>
+                            <td><span style="color: #045fe8;">审核中</span></td>
+                            <td><i class="layui-icon">&#xe605;</i>&nbsp;&nbsp;<a style="color: red;" href="{{route('admin.member.qingjia',['userid'=>$value->userid])}}">去通过</a></td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+
+            </div>
+        </fieldset>
+        @endif
         <fieldset class="layui-elem-field">
             <legend>系统数据统计</legend>
             <div class="layui-field-box">
